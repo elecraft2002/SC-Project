@@ -1,0 +1,27 @@
+{
+  "name": "sc-project",
+  "version": "1.0.0",
+  "description": "Tool for scraping SC Project",
+  "main": "index.js",
+  "dependencies": {
+    "puppeteer": "^10.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elecraft2002/SC-Project.git"
+  },
+  "keywords": [
+    "SC",
+    "Project"
+  ],
+  "author": "Vojtík Suchánek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/elecraft2002/SC-Project/issues"
+  },
+  "homepage": "https://github.com/elecraft2002/SC-Project#readme"
+}
