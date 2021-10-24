@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
-const fs = require("fs")
+const fs = require("fs");
+const { Parser } = require("json2csv");
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -43,7 +44,7 @@ const fs = require("fs")
                 const model = document.querySelector("h1.text-center.bike").innerText.split(typeSplit)[1]
                 const tables = document.querySelectorAll("table > tbody")
 
-                let nazev = `Výfukový systém SC PROJECT ${type} pro ${model}`
+                let nazev = `Výfukový systém SC PROJECT pro ${type} - ${model}`
                 let nazev_feed = nazev
                 let kod
                 let kod2
@@ -83,6 +84,8 @@ const fs = require("fs")
                 }
                 function returnSelected() {
                     calcPrice(cena)
+                    popis = cleanHTML(popis)
+                    popis2 = cleanHTML(popis2)
                     return { nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1 }
                 }
                 function calcPrice(price) {
@@ -90,6 +93,21 @@ const fs = require("fs")
                     let euro = 26
                     let addPrice = 750
                     return price * euro + addPrice
+                }
+
+                function cleanHTML(html) {
+                    let div = document.createElement('div');
+                    div.innerHTML = html;
+                    const elements = div.querySelectorAll("*");
+                    for (let i = 0; i < elements.length; i++) {
+                        const element = elements[i];
+                        element.attributes.length
+                        for (let x = 0; x < element.attributes.length; x++) {
+                            const attribute = element.attributes[x];
+                            element.removeAttribute(attribute)
+                        }
+                    }
+                    return div.innerHTML;
                 }
             }))
             console.log(array[array.length - 1])
@@ -105,6 +123,20 @@ const fs = require("fs")
         }
     }
     console.log(productList)
+
+    //Vytvoří CSV
+
+    const json2csv = new Parser()
+    const productListCSV = json2csv.parse(productList)
+
+    //Uloží ho lokálně
+
+    fs.appendFile("./exports/export2.csv", productListCSV, err => {
+        if (err)
+            throw err
+        console.log("Uloženo")
+    })
+
     console.log('Bikes:', bikes);
 
     await browser.close();
