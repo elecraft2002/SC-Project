@@ -131,7 +131,7 @@ const { Parser } = require("json2csv");
 
     //Uloží ho lokálně
 
-    fs.appendFile("./exports/export2.csv", productListCSV, err => {
+    fs.appendFile("./exports/export.csv", productListCSV, err => {
         if (err)
             throw err
         console.log("Uloženo")
