@@ -103,7 +103,7 @@ const { Parser } = require("json2csv");
                         const element = elements[i];
                         element.attributes.length
                         for (let x = 0; x < element.attributes.length; x++) {
-                            const attribute = element.attributes[x];
+                            const attribute = element.attributes[x].name;
                             element.removeAttribute(attribute)
                         }
                     }
