@@ -18,7 +18,7 @@ const puppeteer = require('puppeteer');
     let products = []
 
     //Zjednodušení pro testování
-    bikes = bikes.slice(0, 1)
+    bikes = bikes.slice(2, 3)
 
     //Dostane všechny odkazy z každé motorky na produkty
     for await (let bike of bikes) {
@@ -30,10 +30,12 @@ const puppeteer = require('puppeteer');
         console.log(products)
     }
     let array = []
+    //array.push("nazev", "nazev_feed", "kod", "kod2", "kategorie", "podkategorie", "podkategorie2", "cena", "popis", "popis2", "vyrobce", "url", "img_url_1")
     let i = 0
     for await (let productArrs of products) {
         for await (let product of productArrs) {
             await page.goto(product)
+            console.log(product)
             array.push(await page.evaluate(() => {
                 let typeSplit = new RegExp(String.fromCharCode(160), "g")
                 const type = document.querySelector("h1.text-center.bike").innerText.split(typeSplit)[0]
@@ -44,42 +46,63 @@ const puppeteer = require('puppeteer');
                 let nazev_feed = nazev
                 let kod
                 let kod2
-                let kategorie
-                let podkategorie
-                let podkategorie2
+                let kategorie = "SC PROJECT"
+                let podkategorie = type
+                let podkategorie2 = model
                 let cena
-                let popis
-                let popis2
-                let vyrobce
-                let url
+                let popis = document.querySelector(".col-md-7 .col-sm-6:nth-of-type(2), .col-md-7 .col-md-6:nth-of-type(2)").innerHTML.replace("&nbsp", " ")
+                let popis2 = document.querySelector(".col-md-7 .col-sm-6, .col-md-7 .col-md-6").innerHTML.replace("&nbsp", " ")
+                let vyrobce = "SC PROJECT"
+                let url = document.URL
                 let img_url_1
 
                 img_url_1 = document.querySelector(".img-thumbnail > a").href
 
                 //Najde kolik je možností prodktů
-                let options
-                if (document.querySelector(".btn.btn-primary.btn-lg") != null) {
-
+                if (document.querySelector(".btn.btn-primary.btn-lg") != undefined) {
+                    //return "Jeden produkt"
+                    kod = document.querySelector(" div.col-md-4 > p > strong").innerText
+                    cena = parseInt(document.querySelector("#pricezone > div:nth-child(1) > span:nth-child(3)").innerText.match("(?<=€ )(.+?)(?=,)")[0])
+                    return [returnSelected()]
                 }
 
-                if (document.querySelectorAll(".btn.btn-primary.btn-sm") != null) {
+                if (document.querySelectorAll(".btn.btn-primary.btn-sm") != undefined) {
                     let confign = tables[1]
+                    let out = []
+
                     for (let i = 0; i < confign.getElementsByTagName("tr").length - 1; i++) {
                         const lineInTable = confign.getElementsByTagName("tr")[i + 1];
-                        kod = lineInTable[0].innerText
-                        
+                        kod = lineInTable.getElementsByTagName("td")[0].innerText
+                        popis += "Description<br>" + lineInTable.getElementsByTagName("td")[1].innerText.split("\n")[0]
+                        cena = parseInt(lineInTable.getElementsByTagName("td")[2].innerText.match("(?<=€ )(.+?)(?=,)")[0])
+                        out.push(returnSelected())
                     }
-                    returnSelected()
+                    return out
                 }
                 function returnSelected() {
-                    return [nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1]
+                    calcPrice(price)
+                    return { nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1 }
+                }
+                function calcPrice(price) {
+                    //Přepočítá cenu na CZK
+                    let euro = 26
+                    let addPrice = 750
+                    return price * euro + addPrice
                 }
             }))
-            console.log(array)
+            console.log(array.at(-1))
             //[nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1]
         }
     }
-
+    let productList = []
+    for (let i = 0; i < array.length; i++) {
+        const element = array[i];
+        for (let x = 0; x < element.length; x++) {
+            const product = element[x];
+            productList.push(product)
+        }
+    }
+    console.log(productList)
     console.log('Bikes:', bikes);
 
     await browser.close();
