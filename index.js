@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const fs = require("fs")
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -50,8 +51,8 @@ const puppeteer = require('puppeteer');
                 let podkategorie = type
                 let podkategorie2 = model
                 let cena
-                let popis = document.querySelector(".col-md-7 .col-sm-6:nth-of-type(2), .col-md-7 .col-md-6:nth-of-type(2)").innerHTML.replace("&nbsp", " ")
-                let popis2 = document.querySelector(".col-md-7 .col-sm-6, .col-md-7 .col-md-6").innerHTML.replace("&nbsp", " ")
+                let popis = `${document.querySelector(".col-md-7 .col-sm-6:nth-of-type(2), .col-md-7 .col-md-6:nth-of-type(2)").innerHTML.replace("&nbsp", " ")}`
+                let popis2 = `${document.querySelector(".col-md-7 .col-sm-6, .col-md-7 .col-md-6").innerHTML.replace("&nbsp", " ")}`
                 let vyrobce = "SC PROJECT"
                 let url = document.URL
                 let img_url_1
@@ -59,13 +60,14 @@ const puppeteer = require('puppeteer');
                 img_url_1 = document.querySelector(".img-thumbnail > a").href
 
                 //Najde kolik je možností prodktů
+                //Jeden produkt
                 if (document.querySelector(".btn.btn-primary.btn-lg") != undefined) {
                     //return "Jeden produkt"
                     kod = document.querySelector(" div.col-md-4 > p > strong").innerText
                     cena = parseInt(document.querySelector("#pricezone > div:nth-child(1) > span:nth-child(3)").innerText.match("(?<=€ )(.+?)(?=,)")[0])
                     return [returnSelected()]
                 }
-
+                //Více produktů
                 if (document.querySelectorAll(".btn.btn-primary.btn-sm") != undefined) {
                     let confign = tables[1]
                     let out = []
@@ -73,14 +75,14 @@ const puppeteer = require('puppeteer');
                     for (let i = 0; i < confign.getElementsByTagName("tr").length - 1; i++) {
                         const lineInTable = confign.getElementsByTagName("tr")[i + 1];
                         kod = lineInTable.getElementsByTagName("td")[0].innerText
-                        popis += "Description<br>" + lineInTable.getElementsByTagName("td")[1].innerText.split("\n")[0]
+                        popis += "Description<br>" + lineInTable.getElementsByTagName("td")[1].innerText.split("\n")[0].replace("&nbsp", " ")
                         cena = parseInt(lineInTable.getElementsByTagName("td")[2].innerText.match("(?<=€ )(.+?)(?=,)")[0])
                         out.push(returnSelected())
                     }
                     return out
                 }
                 function returnSelected() {
-                    calcPrice(price)
+                    calcPrice(cena)
                     return { nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1 }
                 }
                 function calcPrice(price) {
@@ -90,7 +92,7 @@ const puppeteer = require('puppeteer');
                     return price * euro + addPrice
                 }
             }))
-            console.log(array.at(-1))
+            console.log(array[array.length - 1])
             //[nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1]
         }
     }
