@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require("fs");
 const { Parser } = require("json2csv");
+const XLSX = require("xlsx");
 const config = require("./config");
 
 async function startBrowser() {
@@ -26,21 +27,38 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
 
 async function importProducts(page, eshopUrl, headers, PATH) {
     console.log(headers)
-    await page.goto(`${eshopUrl}admin/importy/#zbozi`)
-    await page.evaluate((headers, PATH) => {
+    await page.goto(`${eshopUrl}admin/importy/#zbozi`, { waitUntil: 'networkidle2' })
+
+    const input = await page.$("#soubor")
+    await input.uploadFile(PATH)
+
+    await page.evaluate((headers) => {
+        settings()
         const table = document.querySelector("tbody")
         const rows = table.getElementsByTagName("tr")
-        console.log(rows)
         for (let i = 0; i < rows.length - 1; i++) {
             const row = rows[i + 1];
             const cells = row.getElementsByTagName("td")
-            console.log(cells)
             if (headers.includes(cells[3].innerText)) {
                 cells[0].getElementsByTagName("input")[0].click()
-                console.log(true)
             }
         }
-    }, headers, PATH)
+
+        function settings() {
+            //!IMPORT
+            document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(3) > label").click()
+            //O duplicitě zboží se rozhodovat na základě: podle jeho kódu dodavatele
+            document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(7) > label").click()
+            //Obrázky:
+            if (headers.includes("img_url_1")) {
+                document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(21) > label").click()
+                document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(28) > label").click()
+            }
+        }
+        //Upload to SIMPLIA
+        // document.querySelector(`input[type="submit"]`).click()
+
+    }, headers)
     return
 }
 //Hlavní funkce
@@ -59,9 +77,10 @@ async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.c
 
 async function loopImport(page, eshopUrl, array, i) {
     console.log("Importing")
-    const csv = createCSV(array[i])
-    const PATH = "./import.csv"
-    createFile(csv, PATH)
+    //const csv = createCSV(array[i])
+    const PATH = "./import.xlsx"
+    //createFile(csv, PATH)
+    createXLSX(array[i], PATH)
     const headers = Object.keys(array[0][0])
     await importProducts(page, eshopUrl, headers, PATH)
     i++
@@ -75,6 +94,20 @@ function createCSV(array) {
     const json2csv = new Parser()
     const arrayCSV = json2csv.parse(array)
     return arrayCSV
+}
+
+function createXLSX(array, PATH) {
+    const workSheet = XLSX.utils.json_to_sheet(array);
+    const workBook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workBook, workSheet, "students")
+    // Generate buffer
+    XLSX.write(workBook, { bookType: 'xlsx', type: "buffer" })
+
+    // Binary string
+    XLSX.write(workBook, { bookType: "xlsx", type: "binary" })
+
+    XLSX.writeFile(workBook, PATH)
 }
 
 function createFile(array, path) {

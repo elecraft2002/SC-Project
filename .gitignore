@@ -1,4 +1,4 @@
 node_modules/*
 exports/*
 config.js
-import.csv
+import.xlsx
