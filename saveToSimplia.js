@@ -24,11 +24,23 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
     return
 }
 
-async function importProducts(page, eshopUrl) {
+async function importProducts(page, eshopUrl, headers, PATH) {
+    console.log(headers)
     await page.goto(`${eshopUrl}admin/importy/#zbozi`)
-    /*     await page.evaluate(() => {
-    
-        }) */
+    await page.evaluate((headers, PATH) => {
+        const table = document.querySelector("tbody")
+        const rows = table.getElementsByTagName("tr")
+        console.log(rows)
+        for (let i = 0; i < rows.length - 1; i++) {
+            const row = rows[i + 1];
+            const cells = row.getElementsByTagName("td")
+            console.log(cells)
+            if (headers.includes(cells[3].innerText)) {
+                cells[0].getElementsByTagName("input")[0].click()
+                console.log(true)
+            }
+        }
+    }, headers, PATH)
     return
 }
 //Hlavní funkce
@@ -50,10 +62,11 @@ async function loopImport(page, eshopUrl, array, i) {
     const csv = createCSV(array[i])
     const PATH = "./import.csv"
     createFile(csv, PATH)
-    await importProducts(page, eshopUrl)
+    const headers = Object.keys(array[0][0])
+    await importProducts(page, eshopUrl, headers, PATH)
     i++
-    if (array.length > i)
-        loopImport(page, eshopUrl, array, i)
+    //if (array.length > i)
+    //loopImport(page, eshopUrl, array, i)
 }
 
 function createCSV(array) {
