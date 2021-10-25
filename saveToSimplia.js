@@ -5,7 +5,7 @@ const XLSX = require("xlsx");
 const config = require("./config");
 
 async function startBrowser() {
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
     return page
 }
@@ -28,7 +28,6 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
 async function importProducts(page, eshopUrl, headers, PATH) {
     console.log(headers)
 
-    await page.reload({ waitUntil: 'networkidle2' })
 
     const input = await page.$("#soubor")
     await input.uploadFile(PATH)
@@ -42,6 +41,9 @@ async function importProducts(page, eshopUrl, headers, PATH) {
             const cells = row.getElementsByTagName("td")
             if (headers.includes(cells[3].innerText)) {
                 cells[0].getElementsByTagName("input")[0].click()
+                console.log(true)
+            } else {
+                console.log(false)
             }
         }
 
@@ -62,7 +64,8 @@ async function importProducts(page, eshopUrl, headers, PATH) {
         document.querySelector(`input[type="submit"]`).click()
 
     }, headers)
-    await page.waitForSelector(".gritter-success, .gritter-error")
+    await page.waitForSelector(".gritter-success, .gritter-error", { timeout: 0 })
+    await page.reload({ waitUntil: 'networkidle2' })
     return
 }
 //Hlavní funkce
@@ -76,7 +79,7 @@ async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.c
 }
 
 async function loopImport(page, eshopUrl, array, i) {
-    console.log("Importing")
+    console.log(`Importing ${i + 1} / ${array.length}`)
     //const csv = createCSV(array[i])
     const PATH = "./import.xlsx"
     //createFile(csv, PATH)
@@ -84,8 +87,9 @@ async function loopImport(page, eshopUrl, array, i) {
     const headers = Object.keys(array[0][0])
     await importProducts(page, eshopUrl, headers, PATH)
     i++
-    //if (array.length > i)
-    //loopImport(page, eshopUrl, array, i)
+    if (array.length > i) {
+        //loopImport(page, eshopUrl, array, i)
+    }
 }
 
 function createCSV(array) {

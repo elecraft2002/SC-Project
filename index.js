@@ -49,12 +49,12 @@ const simplia = require("./saveToSimplia");
 
                 let nazev = `Výfukový systém SC PROJECT pro ${type} - ${model}`
                 let nazev_feed = nazev
-                let kod
-                let kod2
+                let kod = ""
+                let kod2 = ""
                 let kategorie = "SC PROJECT"
                 let podkategorie = type
                 let podkategorie2 = model
-                let cena
+                let cena = 0
                 let popis = `${document.querySelector(".col-md-7 .col-sm-6:nth-of-type(2), .col-md-7 .col-md-6:nth-of-type(2)").innerHTML.replace("&nbsp", " ")}`
                 let popis2 = `${document.querySelector(".col-md-7 .col-sm-6, .col-md-7 .col-md-6").innerHTML.replace("&nbsp", " ")}`
                 let vyrobce = "SC PROJECT"
@@ -69,6 +69,7 @@ const simplia = require("./saveToSimplia");
                     //return "Jeden produkt"
                     kod = document.querySelector(" div.col-md-4 > p > strong").innerText
                     cena = parseInt(document.querySelector("#pricezone > div:nth-child(1) > span:nth-child(3)").innerText.match("(?<=€ )(.+?)(?=,)")[0])
+                    cena = calcPrice(cena)
                     return [returnSelected()]
                 }
                 //Více produktů
@@ -80,13 +81,13 @@ const simplia = require("./saveToSimplia");
                         const lineInTable = confign.getElementsByTagName("tr")[i + 1];
                         kod = lineInTable.getElementsByTagName("td")[0].innerText
                         popis += "Description<br>" + lineInTable.getElementsByTagName("td")[1].innerText.split("\n")[0].replace("&nbsp", " ")
-                        cena = parseInt(lineInTable.getElementsByTagName("td")[2].innerText.match("(?<=€ )(.+?)(?=,)")[0])
+                        cena = parseInt(lineInTable.getElementsByTagName("td")[2].innerText.replace(".", "").match("(?<=€ )(.+?)(?=,)")[0])
+                        cena = calcPrice(cena)
                         out.push(returnSelected())
                     }
                     return out
                 }
                 function returnSelected() {
-                    calcPrice(cena)
                     popis = cleanHTML(popis)
                     popis2 = cleanHTML(popis2)
                     return { nazev, nazev_feed, kod, kod2, kategorie, podkategorie, podkategorie2, cena, popis, popis2, vyrobce, url, img_url_1 }
@@ -95,7 +96,7 @@ const simplia = require("./saveToSimplia");
                     //Přepočítá cenu na CZK
                     let euro = 26
                     let addPrice = 750
-                    return price * euro + addPrice
+                    return `${price * euro + addPrice}`
                 }
 
                 function cleanHTML(html) {
@@ -119,7 +120,7 @@ const simplia = require("./saveToSimplia");
     }
     let productList = []
     let kodNum = 0
-    const KOD2 = "SC-P-"
+    const KOD2 = "SC2-"
     for (let i = 0; i < array.length; i++) {
         let element = array[i];
         for (let x = 0; x < element.length; x++) {
@@ -147,6 +148,6 @@ const simplia = require("./saveToSimplia");
     })
 
     console.log('Bikes:', bikes);
-    simplia.save(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
+    simplia.save(config.username(), config.password(), "https://www.rutan.cz/", productList, 100)
 
 })();
