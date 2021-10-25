@@ -88,7 +88,7 @@ async function loopImport(page, eshopUrl, array, i) {
     await importProducts(page, eshopUrl, headers, PATH)
     i++
     if (array.length > i) {
-        //loopImport(page, eshopUrl, array, i)
+        loopImport(page, eshopUrl, array, i)
     }
 }
 
