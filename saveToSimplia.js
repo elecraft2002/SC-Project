@@ -27,7 +27,8 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
 
 async function importProducts(page, eshopUrl, headers, PATH) {
     console.log(headers)
-    await page.goto(`${eshopUrl}admin/importy/#zbozi`, { waitUntil: 'networkidle2' })
+
+    await page.reload({ waitUntil: 'networkidle2' })
 
     const input = await page.$("#soubor")
     await input.uploadFile(PATH)
@@ -70,6 +71,7 @@ async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.c
     array = splitArray(array, arrayLength)
     await login(page, USERNAME, PASSWORD, eshopUrl)
     //await importProducts(page, eshopUrl)
+    await page.goto(`${eshopUrl}admin/importy/#zbozi`, { waitUntil: 'networkidle2' })
     await loopImport(page, eshopUrl, array, 0)
 }
 
@@ -756,4 +758,6 @@ let array = [
 ]
 //saving(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
 
-module.exports.saving = saving()
+module.exports.save = (USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.cz) */, array, arrayLength) => {
+    saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.cz) */, array, arrayLength)
+}

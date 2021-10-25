@@ -123,8 +123,10 @@ const simplia = require("./saveToSimplia");
     for (let i = 0; i < array.length; i++) {
         let element = array[i];
         for (let x = 0; x < element.length; x++) {
-            const product = element[x].kod2 = KOD2 + kodNum;
+            element[x].kod2 = KOD2 + kodNum
+            const product = element[x];
             productList.push(product)
+            kodNum++
         }
     }
     await browser.close();
@@ -145,6 +147,6 @@ const simplia = require("./saveToSimplia");
     })
 
     console.log('Bikes:', bikes);
-    simplia.saving(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
+    simplia.save(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
 
 })();
