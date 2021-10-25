@@ -1,6 +1,9 @@
 const puppeteer = require('puppeteer');
 const fs = require("fs");
 const { Parser } = require("json2csv");
+const config = require("./config");
+const simplia = require("./saveToSimplia");
+
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -33,7 +36,6 @@ const { Parser } = require("json2csv");
     }
     let array = []
     //array.push("nazev", "nazev_feed", "kod", "kod2", "kategorie", "podkategorie", "podkategorie2", "cena", "popis", "popis2", "vyrobce", "url", "img_url_1")
-    let i = 0
     for await (let productArrs of products) {
         for await (let product of productArrs) {
             await page.goto(product)
@@ -122,6 +124,7 @@ const { Parser } = require("json2csv");
             productList.push(product)
         }
     }
+    await browser.close();
     console.log(productList)
 
     //Vytvoří CSV
@@ -139,5 +142,4 @@ const { Parser } = require("json2csv");
 
     console.log('Bikes:', bikes);
 
-    await browser.close();
 })();
