@@ -49,6 +49,8 @@ async function importProducts(page, eshopUrl, headers, PATH) {
             document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(3) > label").click()
             //O duplicitě zboží se rozhodovat na základě: podle jeho kódu dodavatele
             document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(7) > label").click()
+            //O duplicitě zboží se rozhodovat na základě: podle jeho kódu
+            //document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(6) > label").click()
             //Obrázky:
             if (headers.includes("img_url_1")) {
                 document.querySelector(".widget-body:nth-of-type(2) > div > div:nth-child(21) > label").click()
@@ -56,9 +58,10 @@ async function importProducts(page, eshopUrl, headers, PATH) {
             }
         }
         //Upload to SIMPLIA
-        // document.querySelector(`input[type="submit"]`).click()
+        document.querySelector(`input[type="submit"]`).click()
 
     }, headers)
+    await page.waitForSelector(".gritter-success, .gritter-error")
     return
 }
 //Hlavní funkce
@@ -68,11 +71,6 @@ async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.c
     await login(page, USERNAME, PASSWORD, eshopUrl)
     //await importProducts(page, eshopUrl)
     await loopImport(page, eshopUrl, array, 0)
-    /*     for await (let element of array) {
-            console.log(element)
-            element = createCSV(element)
-            createFile(element)
-            page = await importProducts(page, eshopUrl) */
 }
 
 async function loopImport(page, eshopUrl, array, i) {
@@ -111,19 +109,6 @@ function createXLSX(array, PATH) {
 }
 
 function createFile(array, path) {
-    //Cesta k malému souboru
-    //let path = "./import.csv"
-    //Smaže starý
-
-    /*     fs.exists(path, e => {
-            if (e) {
-                console.log("File exists")
-                
-                fs.truncate(path, 0, e => {
-                    if (e) throw err
-                })
-            }
-        }); */
 
 
     //Vytvoří nový soubor
@@ -769,4 +754,6 @@ let array = [
         "img_url_1": "https://shop.sc-project.com/Images/Products/Zoom/A18-LT36_aprilia_rsv4_v4_2018_cr-t_titanium_sc-project_scarico_terminale_scproject.jpg"
     }
 ]
-saving(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
+//saving(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
+
+module.exports.saving = saving()
