@@ -18,27 +18,42 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
         document.getElementsByName("_password")[0].value = PASSWORD
         document.querySelector("button[type=submit]").click()
         console.log(USERNAME)
+        return
     }, USERNAME, PASSWORD)
-    return page
+    await page.waitForNavigation()
+    return
 }
 
 async function importProducts(page, eshopUrl) {
-    await page.goto(`${eshopUrl}admin/importy/`)
-    await page.evaluate(() => {
-
-    })
+    await page.goto(`${eshopUrl}admin/importy/#zbozi`)
+    /*     await page.evaluate(() => {
+    
+        }) */
     return
 }
+//Hlavní funkce
 async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.cz) */, array, arrayLength) {
     let page = await startBrowser()
     array = splitArray(array, arrayLength)
-    page = await login(page, USERNAME, PASSWORD, eshopUrl)
-    for await (let element of array) {
-        console.log(element)
-        element = createCSV(element)
-        createFile(element)
-        page = await importProducts(page, eshopUrl)
-    }
+    await login(page, USERNAME, PASSWORD, eshopUrl)
+    //await importProducts(page, eshopUrl)
+    await loopImport(page, eshopUrl, array, 0)
+    /*     for await (let element of array) {
+            console.log(element)
+            element = createCSV(element)
+            createFile(element)
+            page = await importProducts(page, eshopUrl) */
+}
+
+async function loopImport(page, eshopUrl, array, i) {
+    console.log("Importing")
+    const csv = createCSV(array[i])
+    const PATH = "./import.csv"
+    createFile(csv, PATH)
+    await importProducts(page, eshopUrl)
+    i++
+    if (array.length > i)
+        loopImport(page, eshopUrl, array, i)
 }
 
 function createCSV(array) {
@@ -49,9 +64,9 @@ function createCSV(array) {
     return arrayCSV
 }
 
-function createFile(array) {
+function createFile(array, path) {
     //Cesta k malému souboru
-    let path = "./import.csv"
+    //let path = "./import.csv"
     //Smaže starý
 
     /*     fs.exists(path, e => {
@@ -708,4 +723,4 @@ let array = [
         "img_url_1": "https://shop.sc-project.com/Images/Products/Zoom/A18-LT36_aprilia_rsv4_v4_2018_cr-t_titanium_sc-project_scarico_terminale_scproject.jpg"
     }
 ]
-saving(config.username(), config.password(), "https://www.rutan.cz/", array, 3)
+saving(config.username(), config.password(), "https://www.rutan.cz/", array, 5)
