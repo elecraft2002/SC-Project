@@ -22,22 +22,55 @@ async function login(page, USERNAME, PASSWORD, eshopUrl) {
     return page
 }
 
-async function importProducts(page) {
+async function importProducts(page, eshopUrl) {
     await page.goto(`${eshopUrl}admin/importy/`)
-    await page.evaluate((data) => {
+    await page.evaluate(() => {
 
-    }, data)
+    })
     return
 }
 async function saving(USERNAME, PASSWORD, eshopUrl/* Př www.rutan.cz (simplia.cz) */, array, arrayLength) {
     let page = await startBrowser()
     array = splitArray(array, arrayLength)
     page = await login(page, USERNAME, PASSWORD, eshopUrl)
-    for await (let i of array) {
-        const element = array[i];
-
+    for await (let element of array) {
+        console.log(element)
+        element = createCSV(element)
+        createFile(element)
+        page = await importProducts(page, eshopUrl)
     }
-    page = await importProducts(page)
+}
+
+function createCSV(array) {
+    //Vytvoří CSV
+
+    const json2csv = new Parser()
+    const arrayCSV = json2csv.parse(array)
+    return arrayCSV
+}
+
+function createFile(array) {
+    //Cesta k malému souboru
+    let path = "./import.csv"
+    //Smaže starý
+
+    /*     fs.exists(path, e => {
+            if (e) {
+                console.log("File exists")
+                
+                fs.truncate(path, 0, e => {
+                    if (e) throw err
+                })
+            }
+        }); */
+
+
+    //Vytvoří nový soubor
+    fs.writeFile(path, array, err => {
+        if (err)
+            throw err
+        console.log("File saved")
+    })
 }
 
 function splitArray(array, arrayLength) {
@@ -53,7 +86,7 @@ function splitArray(array, arrayLength) {
         let position = Math.floor(i / arrayLength)
         newArray[position].push(product)
     }
-    console.log(newArray)
+    //console.log(newArray)
     return newArray
 }
 
