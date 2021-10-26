@@ -24,7 +24,7 @@ const simplia = require("./saveToSimplia");
     let products = []
 
     //Zjednodušení pro testování
-    bikes = bikes.slice(2, 3)
+    //bikes = bikes.slice(2, 3)
 
     //Dostane všechny odkazy z každé motorky na produkty
     for await (let bike of bikes) {
@@ -46,7 +46,7 @@ const simplia = require("./saveToSimplia");
                     let typeSplit = new RegExp(String.fromCharCode(160), "g")
                     const type = document.querySelector("h1.text-center.bike").innerText.split(typeSplit)[0]
                     const model = document.querySelector("h1.text-center.bike").innerText.split(typeSplit)[1]
-                    const productType = document.querySelector("div:nth-child(1) > h1.text-center.productname")
+                    const productType = document.querySelector("div:nth-child(1) > h1.text-center.productname").innerText
                     const tables = document.querySelectorAll("table > tbody")
 
                     let nazev = `Výfukový systém SC PROJECT pro ${type} - ${model} - ${productType}`
@@ -159,6 +159,6 @@ const simplia = require("./saveToSimplia");
     })
 
     console.log('Bikes:', bikes);
-    //simplia.save(config.username(), config.password(), "https://www.rutan.cz/", productList, 100)
+    simplia.save(config.username(), config.password(), "https://www.rutan.cz/", productList, 1000)
 
 })();
